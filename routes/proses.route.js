@@ -19,7 +19,7 @@ Router
   // .get('/witelAvail', getWitelAvail)
   // .post('/avail', getAvail)
   // .post('/near', near)
-  .get('/otp', getOTP)
+  .post('/otp', getOTP)
   .post('/verifyOtp', verifyOtp)
   
 

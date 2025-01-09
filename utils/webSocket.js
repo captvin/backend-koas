@@ -11,10 +11,14 @@ module.exports = {
     });
 
     ioInstance.on('connection', (socket) => {
-      console.log(`Client connected: ${socket.id}`);
+      // console.log(`Client connected: ${socket.id}`);
+
+      socket.on('joinRoom', (token) => {
+        socket.join(token); // Token digunakan sebagai nama room
+      });
 
       socket.on('disconnect', () => {
-        console.log(`Client disconnected: ${socket.id}`);
+        // console.log(`Client disconnected: ${socket.id}`);
       });
     });
   },

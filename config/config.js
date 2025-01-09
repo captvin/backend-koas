@@ -8,7 +8,7 @@ module.exports = {
     host: process.env.DB_HOST,
     dialect: process.env.DB_DIALECT,
     // logging: process.env.DB_LOGGING,
-    logging: false,
+    logging: true,
     timezone: '+07:00', // Sesuaikan dengan zona waktu lokal Anda
     dialectOptions: {
       // useUTC: false, // Menggunakan waktu lokal

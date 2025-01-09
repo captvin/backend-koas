@@ -1,4 +1,4 @@
-// const { ct0_bromo_odp, ct0_bromo, SERVICE_INFO_R5, sequelize, ODP_IHLD, ODP_IHLD3, ODP_IHLD_KOMER, ODP_NEAR_KOMER, ODP_NEAR_KOMER_3 } = require('@models')
+const { OTP } = require('@models')
 const { NotFound, Forbidden } = require('http-errors')
 const { getIO } = require('@utils/webSocket');
 const { Op, Sequelize, QueryTypes, fn, col, literal, where } = require('sequelize')
@@ -18,17 +18,39 @@ const io = getIO()
 async function getOTP(req, res, next) {
     const alproId = 1
     const userId = 1
-    const otp = '12345'
+    const token = req.body.token
+    const otp = '123456'
+
+    const dt = {
+        id_alpro: alproId,
+        code: otp,
+        session: token
+    }
 
 
-    await io.emit('reichiveOTP', {otp, userId, alproId})
+    const result = await OTP.create(dt)
 
-    res.status(200).json()
+    if(result) {
+        await io.to(token).emit('reichiveOTP', {otp, userId, alproId})
+        res.status(200).json()
+    }
 }
 
 async function verifyOtp(req, res, next){
-    await io.emit('verifyOtpSuccess', {})
-    res.status(200).json()
+    const { otp } = req.body
+    alproId = 1
+    console.log("ini sebelum ambil db")
+
+    const result = await OTP.findOne({where: {id_alpro: alproId}, order: [['createdAt', 'DESC']]})
+    console.log("ini setelah ambil db")
+
+    if(result.code === otp){
+        console.log("ini masuk if")
+        await io.to(result.session).emit('verifyOtpSuccess', {})
+        res.status(200).json()
+    }
+    
+
 }
 
 

@@ -11,6 +11,10 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.BIGINT,
       allowNull: false
     },
+    session: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    },
     code: {
       type: DataTypes.STRING(6),
       allowNull: false
