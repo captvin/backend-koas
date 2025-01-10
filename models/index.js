@@ -6,39 +6,61 @@ const Sequelize = require('sequelize');
 const process = require('process');
 const basename = path.basename(__filename);
 const env = process.env.NODE_ENV || 'development';
-const config = require(__dirname + '/../config/config.js')[env];
+
+// Konfigurasi untuk database koas
+const configKoas = require(__dirname + '/../config/config.js')[env];
+
+// Konfigurasi untuk database users
+const configUsers = require(__dirname + '/../config/config2.js')[env];
+
 const db = {};
 
-let sequelize;
-
-// Initializing sequelize for the first database (uim)
-if (config.use_env_variable) {
-  sequelize = new Sequelize(process.env[config.use_env_variable], config);
+// Inisialisasi koneksi untuk database koas
+let sequelizeKoas;
+if (configKoas.use_env_variable) {
+  sequelizeKoas = new Sequelize(process.env[configKoas.use_env_variable], configKoas);
 } else {
-  sequelize = new Sequelize(config.database, config.username, config.password, config);
+  sequelizeKoas = new Sequelize(configKoas.database, configKoas.username, configKoas.password, configKoas);
 }
 
+// Inisialisasi koneksi untuk database users
+let sequelizeUsers;
+if (configUsers.use_env_variable) {
+  sequelizeUsers = new Sequelize(process.env[configUsers.use_env_variable], configUsers);
+} else {
+  sequelizeUsers = new Sequelize(configUsers.database, configUsers.username, configUsers.password, configUsers);
+}
 
-// Reading and loading models from the current directory
-fs
-  .readdirSync(__dirname)
-  .filter(file => {
-    return (file.indexOf('.') !== 0) && (file !== basename) && (file.slice(-3) === '.js');
-  })
-  .forEach(file => {
-    // For users model, we need to ensure sequelize2 is used
-    const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes);
-    db[model.name] = model;
-  });
+// Fungsi untuk membaca dan memuat model dari direktori tertentu
+function loadModels(directory, sequelizeInstance) {
+  const models = {};
+  fs
+    .readdirSync(directory)
+    .filter(file => {
+      return (file.indexOf('.') !== 0) && (file !== basename) && (file.slice(-3) === '.js');
+    })
+    .forEach(file => {
+      const model = require(path.join(directory, file))(sequelizeInstance, Sequelize.DataTypes);
+      models[model.name] = model;
+    });
+  return models;
+}
 
-// Associating models
-Object.keys(db).forEach(modelName => {
-  if (db[modelName].associate) {
-    db[modelName].associate(db);
-  }
-});
+// Memuat model dari direktori koas
+const koasModels = loadModels(path.join(__dirname, 'koas'), sequelizeKoas);
 
-db.sequelize = sequelize;
-db.Sequelize = Sequelize;
+// Memuat model dari direktori users
+const usersModels = loadModels(path.join(__dirname, 'users'), sequelizeUsers);
+
+// Menggabungkan semua model ke objek `db`
+db.koas = koasModels;
+db.users = usersModels;
+
+// Menambahkan properti sequelize ke setiap grup model
+db.koas.sequelize = sequelizeKoas;
+db.koas.Sequelize = Sequelize;
+
+db.users.sequelize = sequelizeUsers;
+db.users.Sequelize = Sequelize;
 
 module.exports = db;

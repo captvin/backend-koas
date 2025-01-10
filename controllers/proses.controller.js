@@ -1,4 +1,4 @@
-const { OTP } = require('@models')
+const { OTP } = require('@modelsKoas')
 const { NotFound, Forbidden } = require('http-errors')
 const { getIO } = require('@utils/webSocket');
 const { Op, Sequelize, QueryTypes, fn, col, literal, where } = require('sequelize')
@@ -39,14 +39,12 @@ async function getOTP(req, res, next) {
 async function verifyOtp(req, res, next){
     const { otp } = req.body
     alproId = 1
-    console.log("ini sebelum ambil db")
 
     const result = await OTP.findOne({where: {id_alpro: alproId}, order: [['createdAt', 'DESC']]})
-    console.log("ini setelah ambil db")
 
     if(result.code === otp){
-        console.log("ini masuk if")
         await io.to(result.session).emit('verifyOtpSuccess', {})
+        await OTP.destroy({where: {id_alpro: alproId}})
         res.status(200).json()
     }
     

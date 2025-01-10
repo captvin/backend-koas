@@ -46,7 +46,8 @@
   "_moduleAliases": {
     "@root": ".",
     "@controllers": "./controllers",
-    "@models": "./models",
+    "@modelsKoas": "./models/koas",
+    "@modelsUsers": "./models/users",
     "@routes": "./routes",
     "@middlewares": "./middlewares",
     "@utils": "./utils",

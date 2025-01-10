@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const { Forbidden, Unauthorized } = require('http-errors')
 const { ErrorHandler } = require('@middlewares/error-handler')
-const { users } = require('@models')
+const { tbl_users } = require('@modelsUsers')
 
 require('dotenv').config()
 var { JWT_SECRET_KEY } = process.env
@@ -22,7 +22,7 @@ module.exports = function (req, res, next) {
 
                 
 
-                const chk = await users.findByPk(user.id)
+                const chk = await tbl_users.findByPk(user.id)
                 
                 if(chk.token === token){
                     req.user = {

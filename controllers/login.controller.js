@@ -1,4 +1,4 @@
-const { users } = require('@models')
+const { tbl_users } = require('@modelsUsers')
 const { Sequelize, Op } = require('sequelize')
 const { tokenGenerator } = require('@utils/tokenGenerator')
 const bcrypt = require('bcrypt');
@@ -14,7 +14,7 @@ async function login(req, res, next) {
 
     const { username, password } = req.body
 
-    const result = await users.findOne({ where: Sequelize.where(Sequelize.fn('BINARY', Sequelize.col('username')), username) })
+    const result = await tbl_users.findOne({ where: Sequelize.where(Sequelize.fn('BINARY', Sequelize.col('username')), username) })
     if (!result) {
         return res.status(404).json({
             message: "User not found"
@@ -41,7 +41,7 @@ async function login(req, res, next) {
         const token = await tokenGenerator(data, '3h')
 
         const now = format(new Date(), 'yyyy-MM-dd HH:mm:ss')
-        await users.update({ last_login: now,  token: token }, { where: { id: result.id } })
+        await tbl_users.update({ last_login: now,  token: token }, { where: { id: result.id } })
 
         return res.json({
             logged: true,
@@ -69,14 +69,14 @@ async function changePass(req, res, next) {
     const { oldPass, newPass } = req.body
     const id = req.user.id
 
-    const check = await users.findByPk(id)
+    const check = await tbl_users.findByPk(id)
 
     const password_match = await bcrypt.compare(oldPass, check.password)
 
     if (password_match) {
         const newPassEncrypt = String(await hashPass(newPass));
         console.log(newPassEncrypt)
-        const result = await users.update({ password: newPassEncrypt }, { where: { id } })
+        const result = await tbl_users.update({ password: newPassEncrypt }, { where: { id } })
 
         return result
             ? res.status(200).json("Success")
