@@ -2,7 +2,7 @@ const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
   return sequelize.define('tbl_users', {
     id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT,
       allowNull: false,
       primaryKey: true
     },
@@ -53,10 +53,24 @@ module.exports = function(sequelize, DataTypes) {
     token_aiss: {
       type: DataTypes.TEXT,
       allowNull: true
+    },
+    token_koas: {
+      type: DataTypes.TEXT,
+      allowNull: true
     }
   }, {
     sequelize,
     tableName: 'tbl_users',
-    timestamps: false
+    timestamps: false,
+    indexes: [
+      {
+        name: "PRIMARY",
+        unique: true,
+        using: "BTREE",
+        fields: [
+          { name: "id" },
+        ]
+      },
+    ]
   });
 };

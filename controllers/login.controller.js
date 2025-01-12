@@ -5,16 +5,27 @@ const bcrypt = require('bcrypt');
 const { hashPass } = require('@utils/hashPass')
 const { format } = require('date-fns')
 const CryptoJS = require('crypto-js')
+const jwt = require('jsonwebtoken')
+
+require('dotenv').config()
 
 // const otpStore = new Map();
 
 async function login(req, res, next) {
+    const allAttributes = Object.keys(tbl_users.rawAttributes);
+
+    // Filter kolom yang tidak mengandung kata "token"
+    const excludedAttributes = allAttributes.filter(attr => !attr.toLowerCase().includes('token'));
+    console.log(excludedAttributes)
 
     // try{
 
     const { username, password } = req.body
 
-    const result = await tbl_users.findOne({ where: Sequelize.where(Sequelize.fn('BINARY', Sequelize.col('username')), username) })
+    const result = await tbl_users.findOne({ 
+        where: Sequelize.where(Sequelize.fn('BINARY', Sequelize.col('username')), username),
+        attributes: excludedAttributes
+    })
     if (!result) {
         return res.status(404).json({
             message: "User not found"
@@ -38,10 +49,10 @@ async function login(req, res, next) {
             witel: result.witel,
             description: result.description
         }
-        const token = await tokenGenerator(data, '3h')
+        const token = await tokenGenerator(data, '30d')
 
         const now = format(new Date(), 'yyyy-MM-dd HH:mm:ss')
-        await tbl_users.update({ last_login: now,  token: token }, { where: { id: result.id } })
+        await tbl_users.update({ last_login: now,  token_koas: token }, { where: { id: result.id } })
 
         return res.json({
             logged: true,
@@ -63,6 +74,14 @@ const decryptId = (encryptedId) => {
     const bytes = CryptoJS.AES.decrypt(decodeURIComponent(encryptedId), encryptionKey);
     const originalId = bytes.toString(CryptoJS.enc.Utf8);
     return originalId;
+}
+
+async function cekUserByToken(token){
+    token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTAsImlkX3RlbGVncmFtIjoiMTIzNDU2NyIsInVzZXJuYW1lIjoiMjQwNTAwMDUiLCJuYW1lIjoiTVVIQU1NQUQgQURIRSBBTFZJTiIsImlhdCI6MTczNjY4NDk1NywiZXhwIjoxNzM5Mjc2OTU3fQ.DPAq5m79tYAZfXkPGDv_xxVpOsgFTySZgTwKpAQhe8M"
+    var { JWT_SECRET_KEY } = process.env
+    // token = token.slice(7)
+    const res =  jwt.verify(token, JWT_SECRET_KEY)
+    return res
 }
 
 async function changePass(req, res, next) {
@@ -123,6 +142,7 @@ async function findById(req, res) {
 module.exports = {
     login,
     changePass,
-    findById
+    findById,
+    cekUserByToken
 }
 

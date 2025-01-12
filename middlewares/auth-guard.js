@@ -24,9 +24,10 @@ module.exports = function (req, res, next) {
 
                 const chk = await tbl_users.findByPk(user.id)
                 
-                if(chk.token === token){
+                if(chk.token_koas === token){
                     req.user = {
                         ...user,
+                        token
                     }
                     next()
                 } else {

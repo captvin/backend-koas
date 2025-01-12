@@ -1,5 +1,5 @@
 const Router = require('express').Router()
-const { getOTP, verifyOtp } = require('@controllers/proses.controller')
+const { getOTP, verifyOtp, close } = require('@controllers/proses.controller')
 const authGuard = require('@middlewares/auth-guard')
 const multer = require('multer');
 
@@ -11,7 +11,9 @@ const upload = multer({
 Router
   // .post('/uploadExcel', upload.single('files'), uploadExcel)
   // .get('/insertNear', insertNear)
-  // .use(authGuard)
+  .post('/verifyOtp', verifyOtp)
+  .post('/close', close)
+  .use(authGuard)
   // .post('/getODP', getODP)
   // .post('/detail', detail)
   // .post('/inet', getInet)
@@ -20,7 +22,7 @@ Router
   // .post('/avail', getAvail)
   // .post('/near', near)
   .post('/otp', getOTP)
-  .post('/verifyOtp', verifyOtp)
+  
   
 
 
